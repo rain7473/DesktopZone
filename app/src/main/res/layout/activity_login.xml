@@ -24,9 +24,10 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="20dp"
-                android:src="@drawable/ic_cart"
-                app:tint="@color/green_primary" />
+                android:padding="4dp"
+                android:src="@drawable/logo_login"
+                android:scaleType="centerInside"
+                android:contentDescription="Logo de la tienda" />
         </com.google.android.material.card.MaterialCardView>
 
         <TextView
@@ -34,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:letterSpacing="0.15"
-            android:text="TIENDA VIRTUAL"
+            android:text="DesktopZone"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -43,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Tu tienda en línea favorita"
+            android:text="Tus nuevos componentes te esperan"
             android:textColor="#CCffffff"
             android:textSize="12sp" />
     </LinearLayout>

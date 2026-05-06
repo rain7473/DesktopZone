@@ -19,11 +19,22 @@ import com.google.android.material.snackbar.Snackbar
 
 class FinanzasFragment : Fragment() {
 
+    private enum class FiltroFinanzas(
+        val apiValue: String,
+        val tooltipValueTitle: String,
+        val expandirDiasTooltip: Boolean
+    ) {
+        DOS_SEMANAS("2semanas", "Día seleccionado", true),
+        ESTE_MES("mes", "Ingreso del día", true),
+        TRES_MESES("3meses", "Ingreso del mes", false),
+        ESTE_ANIO("anio", "Ingreso del mes", false)
+    }
+
     private var _binding: FragmentFinanzasBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var repo: AdminDashboardRepository
-    private var filtroActual = "mes"
+    private var filtroActual = FiltroFinanzas.ESTE_MES
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -38,10 +49,10 @@ class FinanzasFragment : Fragment() {
 
         binding.chipGroupFiltro.setOnCheckedStateChangeListener { _, checkedIds ->
             filtroActual = when (checkedIds.firstOrNull()) {
-                R.id.chip2Semanas -> "2semanas"
-                R.id.chip3Meses   -> "3meses"
-                R.id.chipAnio     -> "anio"
-                else               -> "mes"
+                R.id.chip2Semanas -> FiltroFinanzas.DOS_SEMANAS
+                R.id.chip3Meses   -> FiltroFinanzas.TRES_MESES
+                R.id.chipAnio     -> FiltroFinanzas.ESTE_ANIO
+                else              -> FiltroFinanzas.ESTE_MES
             }
             cargarFinanzas()
         }
@@ -53,7 +64,7 @@ class FinanzasFragment : Fragment() {
         binding.progressFinanzas.visibility = View.VISIBLE
 
         repo.obtenerFinanzas(
-            filtro    = filtroActual,
+            filtro = filtroActual.apiValue,
             onSuccess = { data ->
                 binding.tvIngresos.text = "B/. %.2f".format(data.ingresos)
                 dibujarGrafico(data.datos)
@@ -67,50 +78,60 @@ class FinanzasFragment : Fragment() {
     }
 
     private fun dibujarGrafico(datos: List<FinanzasMensual>) {
-        val chart  = binding.chartFinanzas
+        val chart = binding.chartFinanzas
         val labels = datos.map { it.etiqueta }
 
         val entries = datos.mapIndexed { i, d -> BarEntry(i.toFloat(), d.ingresos.toFloat()) }
 
         val dataset = BarDataSet(entries, "Ingresos").apply {
-            color          = Color.parseColor("#2DC66B")
-            valueTextSize  = 0f
+            color = Color.parseColor("#2DC66B")
+            valueTextSize = 0f
             highLightColor = Color.parseColor("#1A8A45")
             highLightAlpha = 120
         }
 
         val barData = BarData(dataset).apply { barWidth = 0.55f }
-        chart.data  = barData
+        chart.data = barData
 
-        // Tooltip
-        val marker = ChartMarkerView(requireContext(), labels = labels)
+        val marker = ChartMarkerView(
+            context = requireContext(),
+            labels = labels,
+            valueTitle = filtroActual.tooltipValueTitle,
+            labelFormatter = { label ->
+                if (filtroActual.expandirDiasTooltip) {
+                    EXPANSION_DIAS[label] ?: label
+                } else {
+                    label
+                }
+            }
+        )
         marker.chartView = chart
         chart.marker = marker
 
         chart.xAxis.apply {
-            valueFormatter  = IndexAxisValueFormatter(labels)
-            position        = XAxis.XAxisPosition.BOTTOM
-            granularity     = 1f
+            valueFormatter = IndexAxisValueFormatter(labels)
+            position = XAxis.XAxisPosition.BOTTOM
+            granularity = 1f
             setDrawGridLines(false)
-            textSize        = 10f
-            textColor       = Color.parseColor("#9E9E9E")
+            textSize = 10f
+            textColor = Color.parseColor("#9E9E9E")
             setCenterAxisLabels(false)
-            axisMinimum     = -0.5f
-            axisMaximum     = datos.size.toFloat() - 0.5f
+            axisMinimum = -0.5f
+            axisMaximum = datos.size.toFloat() - 0.5f
         }
         chart.axisLeft.apply {
             axisMinimum = 0f
             setDrawGridLines(true)
-            gridColor   = Color.parseColor("#F0F0F0")
-            textColor   = Color.parseColor("#9E9E9E")
-            textSize    = 10f
+            gridColor = Color.parseColor("#F0F0F0")
+            textColor = Color.parseColor("#9E9E9E")
+            textSize = 10f
         }
-        chart.axisRight.isEnabled          = false
-        chart.description.isEnabled        = false
-        chart.legend.isEnabled             = false
+        chart.axisRight.isEnabled = false
+        chart.description.isEnabled = false
+        chart.legend.isEnabled = false
         chart.setTouchEnabled(true)
         chart.setPinchZoom(false)
-        chart.isDoubleTapToZoomEnabled     = false
+        chart.isDoubleTapToZoomEnabled = false
         chart.setScaleEnabled(false)
 
         chart.setFitBars(true)
@@ -121,5 +142,15 @@ class FinanzasFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        private val EXPANSION_DIAS = mapOf(
+            "Dom" to "Domingo", "Lun" to "Lunes", "Mar" to "Martes",
+            "Mié" to "Miércoles", "Mie" to "Miércoles", "Jue" to "Jueves",
+            "Vie" to "Viernes", "Sáb" to "Sábado", "Sab" to "Sábado",
+            "Sun" to "Sunday", "Mon" to "Monday", "Tue" to "Tuesday",
+            "Wed" to "Wednesday", "Thu" to "Thursday", "Fri" to "Friday", "Sat" to "Saturday"
+        )
     }
 }
