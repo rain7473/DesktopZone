@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Dashboard" />
+    <item
+        android:id="@+id/nav_inventario"
+        android:icon="@drawable/ic_cart"
+        android:title="Inventario" />
+    <item
+        android:id="@+id/nav_empleados"
+        android:icon="@drawable/ic_person"
+        android:title="Empleados" />
+    <item
+        android:id="@+id/nav_finanzas"
+        android:icon="@drawable/ic_finances"
+        android:title="Finanzas" />
+    <item
+        android:id="@+id/nav_ventas"
+        android:icon="@drawable/ic_orders"
+        android:title="Ventas" />
+</menu>
+

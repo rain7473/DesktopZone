@@ -1,0 +1,69 @@
+# ── Android ───────────────────────────────────────────────────────────────
+*.iml
+.gradle/
+local.properties
+.DS_Store
+/build
+/captures
+.externalNativeBuild/
+.cxx/
+
+# ── Builds generados (se regeneran al compilar) ───────────────────────────
+app/build/
+*/build/
+
+# ── APK / Bundle (no subir binarios) ─────────────────────────────────────
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ── Keystore / Firma (¡NUNCA subir llaves privadas!) ──────────────────────
+*.jks
+*.keystore
+release/
+signing/
+
+# ── IntelliJ / Android Studio ────────────────────────────────────────────
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/deploymentTargetDropDown.xml
+/.idea/migrations.xml
+/.idea/androidTestResultsUserPreferences.xml
+*.iws
+out/
+.navigation/
+.fleet/
+
+# ── Gradle wrapper cache ──────────────────────────────────────────────────
+gradle/wrapper/gradle-wrapper.jar
+
+# ── Logs ──────────────────────────────────────────────────────────────────
+*.log
+lint-results/
+lint-results-*.html
+lint-results-*.xml
+
+# ── Sistema operativo ─────────────────────────────────────────────────────
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ── Backend PHP - archivos sensibles ──────────────────────────────────────
+backend_php/conexion.php
+
+# ── Variables de entorno y configuración sensible ─────────────────────────
+*.env
+.env.local
+config.local.php

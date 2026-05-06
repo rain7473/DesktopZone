@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".TiendaApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Tienda Virtual"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TiendaVirtual"
+        android:networkSecurityConfig="@xml/network_security_config">
+        <!-- Panel Admin principal (bottom nav + fragments) -->
+        <activity
+            android:name=".ui.admin.AdminMainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <!-- Panel Empleado principal (solo lectura) -->
+        <activity
+            android:name=".ui.empleado.EmpleadoMainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <!-- Perfil del administrador -->
+        <activity
+            android:name=".ui.admin.AdminProfileActivity"
+            android:exported="false" />
+        <!-- Formulario empleados -->
+        <activity
+            android:name=".ui.admin.AdminEmpleadoFormActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <!-- Legacy inventory (mantenido por compatibilidad) -->
+        <activity
+            android:name=".ui.admin.AdminProductoFormActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.admin.AdminCategoriasActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <!-- Detalle de producto (solo lectura, empleado y admin) -->
+        <activity
+            android:name=".ui.admin.DetalleProductoEmpleadoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.productos.ProductoDetalleActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.pago.ConfirmacionPagoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.favoritos.FavoritosActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.pago.PagoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.search.SearchActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.perfil.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.pedidos.OrderHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.carrito.CarritoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
