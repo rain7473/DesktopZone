@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -7,12 +9,29 @@ android {
     namespace = "com.david.tiendavirtual"
     compileSdk = 34
 
+    val localProperties = Properties().apply {
+        val localFile = rootProject.file("local.properties")
+        if (localFile.exists()) {
+            localFile.inputStream().use { load(it) }
+        }
+    }
+
+    val backendBaseUrlRaw =
+        System.getenv("BACKEND_BASE_URL")
+            ?: localProperties.getProperty("BACKEND_BASE_URL")
+            ?: "http://10.0.2.2/tienda_virtual_kotlin_android/backend_php/"
+
+    val backendBaseUrl =
+        if (backendBaseUrlRaw.endsWith("/")) backendBaseUrlRaw else "$backendBaseUrlRaw/"
+
     defaultConfig {
         applicationId = "com.david.tiendavirtual"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
+        buildConfigField("String", "BASE_URL", "\"$backendBaseUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -41,6 +60,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 

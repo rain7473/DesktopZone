@@ -1,8 +1,11 @@
 package com.david.tiendavirtual.ui.admin
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.appcompat.app.AppCompatActivity
 import com.david.tiendavirtual.data.model.Categoria
 import com.david.tiendavirtual.data.model.Marca
@@ -16,6 +19,7 @@ class AdminProductoFormActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_PRODUCTO = "extra_producto"
+        private val UNIDADES = listOf("UND", "PAR", "KIT")
     }
 
     private lateinit var binding:    ActivityAdminProductoFormBinding
@@ -34,6 +38,9 @@ class AdminProductoFormActivity : AppCompatActivity() {
         if (!UserSession.isAdmin) { finish(); return }
 
         repo = AdminProductoRepository(this)
+
+        configurarDropdownUnidad()
+        configurarFiltrosPrecios()
 
         // Determinar si es edición o creación
         @Suppress("DEPRECATION")
@@ -94,7 +101,8 @@ class AdminProductoFormActivity : AppCompatActivity() {
     // ── Pre-rellenar campos en modo edición ───────────────────────────────
     private fun rellenarCampos(p: Producto) {
         binding.etNombreProducto.setText(p.nombre)
-        binding.etUnidad.setText(p.unidad)
+        val unidadValida = if (UNIDADES.contains(p.unidad)) p.unidad else "UND"
+        (binding.etUnidad as AutoCompleteTextView).setText(unidadValida, false)
         binding.etDescripcion.setText(p.descripcion)
         binding.etStock.setText(p.stock.toString())
         binding.etPrecioCosto.setText(p.precioCosto.toString())
@@ -102,33 +110,123 @@ class AdminProductoFormActivity : AppCompatActivity() {
         binding.etImagen.setText(p.imagen ?: "")
     }
 
+    // ── Configura el dropdown de unidad ──────────────────────────────────
+    private fun configurarDropdownUnidad() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, UNIDADES)
+        (binding.etUnidad as AutoCompleteTextView).apply {
+            setAdapter(adapter)
+            setOnClickListener { showDropDown() }
+            setOnFocusChangeListener { _, hasFocus -> if (hasFocus) showDropDown() }
+        }
+    }
+
+    // ── Filtros de formato para precios: máx 7 enteros + 2 decimales ─────
+    private fun configurarFiltrosPrecios() {
+        listOf(binding.etPrecioCosto, binding.etPrecioVenta).forEach { et ->
+            et.addTextChangedListener(object : TextWatcher {
+                private var editando = false
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    if (editando || s == null) return
+                    val txt = s.toString()
+                    val punto = txt.indexOf('.')
+                    var corregido = txt
+                    if (punto >= 0) {
+                        val enteros  = txt.substring(0, punto)
+                        val decimales = txt.substring(punto + 1)
+                        corregido = enteros.take(7) + "." + decimales.take(2)
+                    } else {
+                        corregido = txt.take(7)
+                    }
+                    if (corregido != txt) {
+                        editando = true
+                        et.setText(corregido)
+                        et.setSelection(corregido.length)
+                        editando = false
+                    }
+                }
+            })
+        }
+    }
+
+    // ── Limpiar errores inline ────────────────────────────────────────────
+    private fun limpiarErrores() {
+        binding.tilNombreProducto.error = null
+        binding.tilUnidad.error         = null
+        binding.tilStock.error          = null
+        binding.tilPrecioCosto.error    = null
+        binding.tilPrecioVenta.error    = null
+    }
+
     // ── Guardar (agregar o editar) ────────────────────────────────────────
     private fun guardar() {
+        limpiarErrores()
+
         val nombre      = binding.etNombreProducto.text.toString().trim()
-        val unidad      = binding.etUnidad.text.toString().trim().ifEmpty { "UND" }
+        val unidad      = (binding.etUnidad as AutoCompleteTextView).text.toString().trim()
         val descripcion = binding.etDescripcion.text.toString().trim()
         val stockStr    = binding.etStock.text.toString().trim()
         val costoStr    = binding.etPrecioCosto.text.toString().trim()
         val ventaStr    = binding.etPrecioVenta.text.toString().trim()
         val imagen      = binding.etImagen.text.toString().trim()
 
-        // Validación básica
+        var hayError = false
+
+        // Nombre: obligatorio, máx 40 caracteres
         if (nombre.isEmpty()) {
-            Snackbar.make(binding.root, "El nombre es obligatorio", Snackbar.LENGTH_SHORT).show()
-            binding.etNombreProducto.requestFocus(); return
+            binding.tilNombreProducto.error = "El nombre es obligatorio"
+            hayError = true
+        } else if (nombre.length > 40) {
+            binding.tilNombreProducto.error = "Máximo 40 caracteres"
+            hayError = true
         }
+
+        // Unidad: debe ser UND, PAR o KIT
+        if (!UNIDADES.contains(unidad)) {
+            binding.tilUnidad.error = "Selecciona UND, PAR o KIT"
+            hayError = true
+        }
+
+        // Stock: obligatorio, entero entre 0 y 999
+        val stock = stockStr.toIntOrNull()
+        if (stockStr.isEmpty()) {
+            binding.tilStock.error = "El stock es obligatorio"
+            hayError = true
+        } else if (stock == null || stock < 0) {
+            binding.tilStock.error = "Debe ser un número entero ≥ 0"
+            hayError = true
+        }
+
+        // Precio costo: opcional, pero si se pone debe ser ≥ 0
+        val precioCosto = costoStr.toDoubleOrNull()
+        if (costoStr.isNotEmpty() && (precioCosto == null || precioCosto < 0)) {
+            binding.tilPrecioCosto.error = "Debe ser un valor ≥ 0"
+            hayError = true
+        }
+
+        // Precio venta: obligatorio, > 0
+        val precioVenta = ventaStr.toDoubleOrNull()
         if (ventaStr.isEmpty()) {
-            Snackbar.make(binding.root, "El precio de venta es obligatorio", Snackbar.LENGTH_SHORT).show()
-            binding.etPrecioVenta.requestFocus(); return
+            binding.tilPrecioVenta.error = "El precio de venta es obligatorio"
+            hayError = true
+        } else if (precioVenta == null || precioVenta <= 0) {
+            binding.tilPrecioVenta.error = "Debe ser mayor a 0"
+            hayError = true
         }
+
+        // Costo no puede superar al precio de venta
+        if (!hayError && precioCosto != null && precioVenta != null && precioCosto > precioVenta) {
+            binding.tilPrecioCosto.error = "El costo no puede superar el precio de venta"
+            hayError = true
+        }
+
         if (categorias.isEmpty() || marcas.isEmpty()) {
-            Snackbar.make(binding.root, "Espera a que carguen las categorías y marcas", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(binding.root, "Espera a que carguen categorías y marcas", Snackbar.LENGTH_SHORT).show()
             return
         }
 
-        val stock       = stockStr.toIntOrNull() ?: 0
-        val precioCosto = costoStr.toDoubleOrNull() ?: 0.0
-        val precioVenta = ventaStr.toDoubleOrNull() ?: 0.0
+        if (hayError) return
 
         val catSeleccionada = categorias[binding.spinnerCategoria.selectedItemPosition]
         val marSeleccionada = marcas[binding.spinnerMarca.selectedItemPosition]
@@ -136,16 +234,15 @@ class AdminProductoFormActivity : AppCompatActivity() {
         setLoading(true)
 
         if (productoEditar == null) {
-            // ── AGREGAR ──────────────────────────────────────────────────
             val idStr = binding.etIdProducto.text.toString().trim()
             repo.agregarProducto(
                 idProducto  = idStr,
                 nombre      = nombre,
                 unidad      = unidad,
                 descripcion = descripcion,
-                stock       = stock,
-                precioCosto = precioCosto,
-                precioVenta = precioVenta,
+                stock       = stock!!,
+                precioCosto = precioCosto ?: 0.0,
+                precioVenta = precioVenta!!,
                 imagen      = imagen,
                 idCategoria = catSeleccionada.id,
                 idMarca     = marSeleccionada.id,
@@ -160,15 +257,14 @@ class AdminProductoFormActivity : AppCompatActivity() {
                 }
             )
         } else {
-            // ── EDITAR ───────────────────────────────────────────────────
             repo.editarProducto(
                 producto    = productoEditar!!,
                 nombre      = nombre,
                 unidad      = unidad,
                 descripcion = descripcion,
-                stock       = stock,
-                precioCosto = precioCosto,
-                precioVenta = precioVenta,
+                stock       = stock!!,
+                precioCosto = precioCosto ?: 0.0,
+                precioVenta = precioVenta!!,
                 imagen      = imagen,
                 idCategoria = catSeleccionada.id,
                 idMarca     = marSeleccionada.id,

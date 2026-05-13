@@ -126,17 +126,17 @@ mysqli_set_charset($conexion, "utf8mb4");
 
 ### 3. Configurar la URL del backend en Android
 
-Edita `app/src/main/java/com/david/tiendavirtual/utils/Constants.kt`:
+No edites `Constants.kt`. La app toma `BASE_URL` desde `BuildConfig`.
 
-```kotlin
-object Constants {
-    // Cambia por la IP local de tu PC (ver con ipconfig)
-    const val BASE_URL   = "http://TU_IP_LOCAL/tienda_virtual_kotlin_android/backend_php/"
-    const val IMAGES_URL = BASE_URL + "productos/"
-}
+Define la URL en `local.properties` (no se sube al repo):
+
+```properties
+BACKEND_BASE_URL=http://TU_IP_LOCAL/tienda_virtual_kotlin_android/backend_php/
 ```
 
-> **¿Cómo saber tu IP?** Ejecuta `ipconfig` en cmd y busca la IPv4 de tu red WiFi/Ethernet.
+Opcionalmente puedes usar variable de entorno `BACKEND_BASE_URL` (tiene prioridad sobre `local.properties`).
+
+> **¿Cómo saber tu IP?** Ejecuta `ipconfig` y usa la IPv4 de tu red WiFi/Ethernet.
 
 ### 4. Agregar la IP al Network Security Config
 

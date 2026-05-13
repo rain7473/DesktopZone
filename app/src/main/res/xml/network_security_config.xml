@@ -7,10 +7,10 @@
         <domain includeSubdomains="true">10.0.2.2</domain>
         <domain includeSubdomains="true">192.168.40.243</domain>
         <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">110.241.131.118</domain>
-        <domain includeSubdomains="true">192.168.50.128</domain>
         <domain includeSubdomains="true">10.241.131.118</domain>
+        <domain includeSubdomains="true">192.168.50.128</domain>
         <domain includeSubdomains="true">192.168.0.8</domain>
+        <domain includeSubdomains="true">192.168.0.12</domain>
     </domain-config>
 </network-security-config>
 
